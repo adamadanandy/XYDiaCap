@@ -1,92 +1,6 @@
 #include "xydrawbox.h"
 
-LRESULT CALLBACK WndProcDrawbox(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	static HDC            hdc;
-	static HINSTANCE      hInstance;
-	static XYDrawbox      *pXYDrawbox;
 
-	switch (message)
-	{
-	case WM_MOUSEMOVE:
-		//std::cout << "<D>" << LOWORD(lParam) << "," << HIWORD(lParam) << "<D>" << std::endl;
-		break;
-	case WM_CREATE:
-		std::cout << ":D:" << "WM_CREATE" << std::endl;
-		hInstance = ((LPCREATESTRUCT)lParam)->hInstance;
-		pXYDrawbox = (XYDrawbox*)(((LPCREATESTRUCT)lParam)->lpCreateParams);
-		hdc = GetDC(hwnd);
-		break;
-	case WM_SIZE:
-		std::cout << "\\D\\" << LOWORD(lParam) << "," << HIWORD(lParam) << "/D/" << std::endl;
-		pXYDrawbox->SetWndSize(LOWORD(lParam), HIWORD(lParam));
-		pXYDrawbox->SetupScrollBar();
-		pXYDrawbox->RefreshAllScrollBar();
-		break;
-	case WM_PAINT:
-		std::cout << ":D:" << "WM_PAINT" << std::endl;
-		BeginPaint(hwnd, 0);
-		pXYDrawbox->DisplayImage(hdc);
-		EndPaint(hwnd, 0);
-		break;
-	case WM_DESTROY:
-		std::cout << ":D:" << "WM_DESTROY" << std::endl;
-		PostQuitMessage(0);
-		break;
-	case WM_MOUSEWHEEL:
-		std::cout << ":D:" << "WM_MOUSE_WHEEL" << std::endl;
-		break;
-	case WM_VSCROLL:
-		switch (LOWORD(wParam))
-		{
-		case SB_LINELEFT:
-			pXYDrawbox->posYScroll -= pXYDrawbox->lengthYPage / 4;
-			break;
-		case SB_LINERIGHT:
-			pXYDrawbox->posYScroll += pXYDrawbox->lengthYPage / 4;
-			break;
-		case SB_PAGELEFT:
-			pXYDrawbox->posYScroll -= pXYDrawbox->lengthYPage;
-			break;
-		case SB_PAGERIGHT:
-			pXYDrawbox->posYScroll += pXYDrawbox->lengthYPage;
-			break;
-		case SB_THUMBTRACK:
-			pXYDrawbox->GetYScrollTrackPos();
-			pXYDrawbox->posYScroll = pXYDrawbox->scrollinfo.nTrackPos;
-			break;
-		}
-		pXYDrawbox->RefreshYPosScrollBar();
-		InvalidateRect(hwnd, 0, TRUE);
-		std::cout << ":D:" << pXYDrawbox->posXScroll << "," << pXYDrawbox->posYScroll << ":D:" << std::endl;
-		break;
-	case WM_HSCROLL:
-		switch (LOWORD(wParam))
-		{
-		case SB_LINELEFT:
-			pXYDrawbox->posXScroll-=pXYDrawbox->lengthXPage/4;
-			break;
-		case SB_LINERIGHT:
-			pXYDrawbox->posXScroll += pXYDrawbox->lengthXPage / 4;
-			break;
-		case SB_PAGELEFT:
-			pXYDrawbox->posXScroll -= pXYDrawbox->lengthXPage;
-			break;
-		case SB_PAGERIGHT:
-			pXYDrawbox->posXScroll += pXYDrawbox->lengthXPage;
-			break;
-		case SB_THUMBTRACK:
-			pXYDrawbox->GetXScrollTrackPos();
-			pXYDrawbox->posXScroll = pXYDrawbox->scrollinfo.nTrackPos;
-			break;
-		}
-		pXYDrawbox->RefreshXPosScrollBar();
-		InvalidateRect(hwnd, 0, TRUE);
-		std::cout << ":D:" << pXYDrawbox->posXScroll << "," << pXYDrawbox->posYScroll << ":D:" << std::endl;
-		break;
-	}
-	return DefWindowProc(hwnd, message, wParam, lParam);
-}
 
 XYDrawbox::XYDrawbox(HWND hwndp, HINSTANCE hinst, int xpos, int ypos, int xlen, int ylen)
 	: XYWndBase(hwndp, NULL, hinst,"xydrawboxclass", "xydrawboxtitle",
@@ -102,7 +16,6 @@ XYDrawbox::XYDrawbox(HWND hwndp, HINSTANCE hinst, int xpos, int ypos, int xlen, 
 
 BOOL XYDrawbox::InitWnd()
 {
-	SetWndProc(WndProcDrawbox);
 	SetWndProclpParam(this);
 	std::cout << "WNDPROC :D:" << (this->wndProcThis) << std::endl;
 	if (XYWndBase::InitWnd() == FALSE)
