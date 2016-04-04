@@ -228,12 +228,13 @@ NodePlugin* XYPlugin::AddPlugin(char* pluginname)
 		pcache->data.funcOnInterupted = DefaultOnInterupted;
 	}
 	//ASSERT(pluginDataContainer(Filled),pluginAPIContainer(Filled),data->type(NOTFilled),data->hwnd(NOTFilled)
-	pcache->data.pBtnPlugin = new XYButton(this->hwndParent, this->hInstance, this->pluginnum * 35, 0, 30, 30, pluginname, PLUGIN_BASE + this->pluginnum);
+	pcache->data.pluginid = PLUGIN_BASE + this->pluginnum - 1;
+	pcache->data.pBtnPlugin = new XYButton(this->hwndParent, this->hInstance, this->pluginnum * 35, 0, 30, 30, pluginname, pcache->data.pluginid);
 	pcache->data.hwndplugin = pcache->data.pBtnPlugin->hwndThis;
 	pcache->data.pBtnPlugin->InitWnd();
 	pcache->data.pBtnPlugin->SetMessageButton(pluginname);
 	pcache->data.pluginmsg = pcache->data.pBtnPlugin->msgButton;
-	pcache->data.pluginid = PLUGIN_BASE + this->pluginnum - 1;
+	
 	pcache->data.pluginldata.hwndplugin = pcache->data.hwndplugin;
 	pcache->data.pluginldata.pluginid = pcache->data.pluginid;
 	pcache->data.pluginldata.pluginmsg = pcache->data.pluginmsg;
