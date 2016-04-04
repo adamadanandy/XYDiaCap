@@ -2,10 +2,19 @@
 #define PLUGINHEAD_H
 
 #include <Windows.h>
+#include <iostream>
 
 #define PLUGIN_TYPE_BUTTON	1
 #define PLUGIN_TYPE_NULL	0
 #define PLUGIN_BASE			128
+
+#define PLUGIN_BLOCK_SIZE	32
+
+#define XYGetFigData gp_globalfunc->pfGetFigData
+#define XYSetFigData gp_globalfunc->pfSetFigData
+#define XYGetScorllData gp_globalfunc->pfGetScrollData
+#define XYCaptureDesktop gp_globalfunc->pfCaptureDesktop
+#define XYEndPlugin gp_globalfunc->pfEndPlugin
 
 extern "C"
 {
@@ -13,22 +22,22 @@ extern "C"
 	typedef void(*funcgetfigdata)(int*, int*, int*, unsigned char*);
 	//setfigdata(_I_int pixelbits, _I_int w, _I_int h, _I_unsigned char* data)
 	typedef void(*funcsetfigdata)(int, int, int, unsigned char*);
-	//getscrollinfo(_O_int* xpos, _O_int* ypos, _O_int* xscale, _O_int* yscale)
-	typedef void(*funcgetscrollinfo)(int*, int*, int*, int*);
+	//getscrolldata(_O_int* xpos, _O_int* ypos, _O_int* xscale, _O_int* yscale)
+	typedef void(*funcgetscrolldata)(int*, int*, int*, int*);
 	//capturedesktop(void);
 	typedef void(*funccapturedesktop)(void);
 	//endplugin(void);
 	typedef void(*funcendplugin)(void);
 
-	typedef struct tagutilfunc{
+	typedef struct tagpluginglobalfunc{
 		unsigned int structsize;
 		funcgetfigdata pfGetFigData;
 		funcsetfigdata pfSetFigData;
-		funcgetscrollinfo pfGetScrollInfo;
+		funcgetscrolldata pfGetScrollData;
 		funccapturedesktop pfCaptureDesktop;
 		funcendplugin pfEndPlugin;
 		void* preserved;
-	} utilfunc, *putilfunc;
+	} pluginglobalfunc, *ppluginglobalfunc;
 
 	typedef struct tagfigchange{
 		BOOL bchangefig;
@@ -38,22 +47,28 @@ extern "C"
 		unsigned char* figdata;
 	} figchange, *pfigchange;
 
-	typedef struct tagutildata{
+	typedef struct tagpluginglobaldata{
 		unsigned int	structsize;
 		//global data
 		HWND			hwndframe;
 		HWND			hwnddrawbox;
 		HDC				hdcdrawbox;
+
+		int				reserved;
+	} pluginglobaldata, *ppluginglobaldata;
+
+	typedef struct tagpluginlocaldata{
+		unsigned int	structsize;
 		//plugin local data
 		HWND			hwndplugin;
 		unsigned int	pluginmsg;
 		int				pluginid;
 
 		int				reserved;
-	} utildata, *putildata;
+	} pluginlocaldata, *ppluginlocaldata;
 
-	//RegisterPlugin(_I_putildata pdata, _I_putilfunc pfunc);
-	typedef BOOL(*funcregisterplugin)(putildata, putilfunc);
+	//RegisterPlugin(_I_ppluginglobalfunc pgfunc, _I_ppluginglobaldata pgdata, _I_ppluginlocaldata pldata);
+	typedef BOOL(*funcregisterplugin)(ppluginglobalfunc, ppluginglobaldata, ppluginlocaldata);
 	//OnLoadPlugin(_O_pfigchange pchange)
 	typedef void(*funconloadplugin)(pfigchange);
 	//OnMouseMove(_I_LPARAM* plParam, _I_WPARAM* pwParam, _O_pfigchange pchange);
@@ -74,6 +89,12 @@ extern "C"
 	typedef void(*funconprivatemessage)(LPARAM*, WPARAM*, pfigchange);
 	//OnInterupted(_O_pfigchange pchange)
 	typedef void(*funconinterupted)(pfigchange);
-}
 
-#endif//PLUGiNHEAD_H
+	BOOL __declspec(dllexport) RegisterPlugin(ppluginglobalfunc pplugingfunc, ppluginglobaldata pplugingdata, ppluginlocaldata ppluginldata);
+
+	extern ppluginglobaldata gp_globaldata;
+	extern ppluginglobalfunc gp_globalfunc;
+	extern ppluginlocaldata  gp_localdata;
+};
+
+#endif//PLUGINHEAD_H

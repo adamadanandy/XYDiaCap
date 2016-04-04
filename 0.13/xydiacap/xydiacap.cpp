@@ -280,6 +280,7 @@ BOOL XYDiaCap::InitWindows()
 	xyDiaCapUtilData.hwndframe = this->pXYFrame->hwndThis;
 	xyDiaCapUtilData.hdcdrawbox = NULL;
 	pXYPlugin->InitPluginGData(&xyDiaCapUtilData);
+	pXYPlugin->AddPlugin("captureplugin");
 	return TRUE;
 }
 
